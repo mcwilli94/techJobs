@@ -1,6 +1,8 @@
 package org.launchcode.techjobs.console;
 
+import java.lang.reflect.Array;
 import java.util.ArrayList;
+import java.util.Dictionary;
 import java.util.HashMap;
 import java.util.Scanner;
 
@@ -56,15 +58,20 @@ public class TechJobs {
                 // How does the user want to search (e.g. by skill or employer)
                 String searchField = getUserSelection("Search by:", columnChoices);
 
-                // What is their search term?
+
+                // Determines the search term
                 System.out.println("\nSearch term: ");
                 String searchTerm = in.nextLine();
 
-                if (searchField.equals("all")) {
-                    System.out.println("Search all fields not yet implemented.");
+
+                // Determines which columns to search the term under
+                if (searchField.equals("all") || searchField.equals("0")) {
+                    findByValue(JobData.findAll(), searchTerm);
                 } else {
                     printJobs(JobData.findByColumnAndValue(searchField, searchTerm));
                 }
+
+
             }
         }
     }
@@ -110,7 +117,60 @@ public class TechJobs {
 
     // Print a list of jobs
     private static void printJobs(ArrayList<HashMap<String, String>> someJobs) {
+        // Initialize variables
+        HashMap<String, String> jobs = new HashMap<>();
 
-        System.out.println("printJobs is not implemented yet");
+        // Print out error message if search term not found in database
+        if (someJobs.isEmpty() == true){
+            System.out.println("There are no results for that term");
+
+        } else {
+            // print out all jobs matching the search term
+            for (int i = 0; i < someJobs.size(); i++) {
+                jobs = someJobs.get(i);
+                for (String k : jobs.keySet()) {
+                    System.out.println(k + " : " + jobs.get(k));
+                }
+                System.out.println("\n");
+            }
+        }
+
     }
+
+    private static void findByValue(ArrayList<HashMap<String, String>> someJobs, String searchTerm) {
+        // Initialize Variables
+        HashMap<String, String> jobs = new HashMap<>();
+        Object[] matches;
+        int count = 0;
+
+
+        // Find and add to an array the cases matching the search term
+        for (int i = 0; i < someJobs.size(); i++) {
+            jobs = someJobs.get(i);
+            for (String k : jobs.keySet()){
+
+                if (jobs.get(k).toLowerCase().contains(searchTerm.toLowerCase())){
+                    count += 1;
+                    matches = jobs.entrySet().toArray();
+                    for (int j = 0; j < matches.length; j++){
+
+                        // Prints the matching job openings properly
+                        int x = matches[j].toString().indexOf("=");
+                        System.out.println(matches[j].toString().substring(0,x) + " : " + matches[j].toString().substring(x+1,matches[j].toString().length()));
+                    }
+                    System.out.println("\n");
+                    break;  // prevents the same job from appearing more than once
+                }
+
+            }
+
+        }
+
+        // Display error message if results not found
+        if (count == 0){
+            System.out.println("\nThere are not results for that term");
+        }
+
+    }
+
 }
